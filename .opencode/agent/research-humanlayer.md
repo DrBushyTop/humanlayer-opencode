@@ -12,16 +12,9 @@ tools:
   todoread: true
   webfetch: true
   bash: false
-  edit: false
-  write: false
+  edit: true
+  write: true
   patch: false
-permissions:
-  bash:
-    "*": "deny"
-  edit:
-    "**/*": "deny"
-  write:
-    "**/*": "deny"
 ---
 
 # Research (Humanlayer) Agent

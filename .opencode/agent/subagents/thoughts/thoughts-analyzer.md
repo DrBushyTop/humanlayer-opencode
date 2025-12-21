@@ -10,13 +10,6 @@ tools:
   bash: false
   edit: false
   write: false
-permissions:
-  bash:
-    "*": "deny"
-  edit:
-    "**/*": "deny"
-  write:
-    "**/*": "deny"
 ---
 
 # Thoughts Analyzer Agent
