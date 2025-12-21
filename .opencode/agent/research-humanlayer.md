@@ -15,6 +15,13 @@ tools:
   edit: true
   write: true
   patch: false
+permissions:
+  edit:
+    ".opencode/thoughts/research/*": "allow"
+    ".opencode/thoughts/shared/handoffs/*": "allow"
+  write:
+    ".opencode/thoughts/research/*": "allow"
+    ".opencode/thoughts/shared/handoffs/*": "allow"
 ---
 
 # Research (Humanlayer) Agent

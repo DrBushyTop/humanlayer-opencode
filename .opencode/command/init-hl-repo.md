@@ -1,6 +1,8 @@
 ---
 description: "Initialize repository with HumanLayer workflow structure"
 subtask: true
+tools:
+  bash: true
 ---
 
 # Initialize HumanLayer Repository Command
@@ -32,12 +34,16 @@ If not a git repo, warn user but continue.
 .opencode/
 ├── agent/
 │   └── subagents/
-│       └── research/
+│       ├── research/
+│       └── thoughts/
 ├── command/
+├── scripts/
 └── thoughts/
     ├── research/
     ├── plans/
-    └── handoffs/
+    └── shared/
+        └── handoffs/
+            └── general/
 ```
 
 ### Step 4: Create Agent Files
@@ -47,6 +53,11 @@ Copy these files to `.opencode/agent/subagents/research/`:
 1. `codebase-locator.md`
 2. `codebase-analyzer.md`
 3. `pattern-finder.md`
+
+Copy these files to `.opencode/agent/subagents/thoughts/`:
+
+1. `thoughts-locator.md`
+2. `thoughts-analyzer.md`
 
 [Use the content from Phase 1 plan or read from existing installation]
 
@@ -64,15 +75,27 @@ Copy these files to `.opencode/command/`:
 
 [Use the content from Phase 1 and Phase 2 plans]
 
-### Step 6: Create .gitkeep Files
+### Step 6: Create Scripts
+
+Copy to `.opencode/scripts/`:
+
+1. `spec_metadata.sh` - Metadata gathering script for handoffs
+
+Make executable:
+```bash
+chmod +x .opencode/scripts/spec_metadata.sh
+```
+
+### Step 7: Create .gitkeep Files
 
 Create `.gitkeep` in empty directories:
 
 - `.opencode/thoughts/research/.gitkeep`
 - `.opencode/thoughts/plans/.gitkeep`
-- `.opencode/thoughts/handoffs/.gitkeep`
+- `.opencode/thoughts/shared/handoffs/.gitkeep`
+- `.opencode/thoughts/shared/handoffs/general/.gitkeep`
 
-### Step 7: Create README
+### Step 8: Create README
 
 Create `.opencode/README.md`:
 
@@ -91,12 +114,17 @@ This directory contains the HumanLayer Research → Plan → Implement workflow 
 
 ```
 .opencode/
-├── agent/subagents/research/   # Research subagents
-├── command/                    # Slash commands
-└── thoughts/                   # Persistent artifacts
-    ├── research/               # Research documents
-    ├── plans/                  # Implementation plans
-    └── handoffs/               # Session handoffs
+├── agent/subagents/
+│   ├── research/           # Research subagents
+│   └── thoughts/           # Thoughts management subagents
+├── command/                # Slash commands
+├── scripts/                # Utility scripts
+└── thoughts/               # Persistent artifacts
+    ├── research/           # Research documents
+    ├── plans/              # Implementation plans
+    └── shared/handoffs/    # Session handoffs
+        ├── {TICKET}/       # Ticket-specific handoffs
+        └── general/        # Non-ticket handoffs
 ```
 
 ## Commands
@@ -109,7 +137,9 @@ This directory contains the HumanLayer Research → Plan → Implement workflow 
 | `/iterate [plan] [feedback]` | Update existing plan                 |
 | `/validate [plan]`           | Verify implementation matches plan   |
 | `/handoff`                   | Create session handoff document      |
+| `/handoff TICKET-123`        | Create handoff for specific ticket   |
 | `/resume [handoff]`          | Resume from handoff                  |
+| `/resume TICKET-123`         | Resume from most recent ticket handoff |
 
 ## Workflow
 
@@ -133,7 +163,7 @@ This workflow uses "Frequent Intentional Compaction":
 - [OpenCode Documentation](https://opencode.ai/docs)
 ```
 
-### Step 8: Present Summary
+### Step 9: Present Summary
 
 ```markdown
 ## Repository Initialized
@@ -142,10 +172,14 @@ This workflow uses "Frequent Intentional Compaction":
 
 ```
 .opencode/
-├── agent/subagents/research/
-│   ├── codebase-locator.md
-│   ├── codebase-analyzer.md
-│   └── pattern-finder.md
+├── agent/subagents/
+│   ├── research/
+│   │   ├── codebase-locator.md
+│   │   ├── codebase-analyzer.md
+│   │   └── pattern-finder.md
+│   └── thoughts/
+│       ├── thoughts-locator.md
+│       └── thoughts-analyzer.md
 ├── command/
 │   ├── research.md
 │   ├── plan.md
@@ -154,10 +188,13 @@ This workflow uses "Frequent Intentional Compaction":
 │   ├── validate.md
 │   ├── handoff.md
 │   └── resume.md
+├── scripts/
+│   └── spec_metadata.sh
 ├── thoughts/
 │   ├── research/
 │   ├── plans/
-│   └── handoffs/
+│   └── shared/handoffs/
+│       └── general/
 └── README.md
 ```
 
@@ -172,7 +209,7 @@ This workflow uses "Frequent Intentional Compaction":
 Consider adding to `.gitignore`:
 ```
 # OpenCode session artifacts (optional)
-# .opencode/thoughts/handoffs/
+# .opencode/thoughts/shared/handoffs/
 ```
 
 Ready to use the HumanLayer workflow!

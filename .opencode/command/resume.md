@@ -1,31 +1,50 @@
 ---
 description: "Resume work from a handoff document"
+tools:
+  bash: true
 ---
 
 # Resume Command
 
 Resume from handoff: `$ARGUMENTS`
 
-If no path given, list recent handoffs from `.opencode/thoughts/handoffs/`.
+**Argument formats:**
+- `/resume` - List recent handoffs and ask user to choose
+- `/resume path/to/handoff.md` - Resume from specific handoff file
+- `/resume TICKET-123` - Resume from most recent handoff for ticket
 
 ## Purpose
 Resume work from a handoff document, verifying current state and restoring context for seamless continuation.
 
 ## Process
 
-### Step 1: Find Handoff
-1. If path provided in `$ARGUMENTS`, use it
-2. If no path, list recent handoffs:
-   ```bash
-   ls -lt .opencode/thoughts/handoffs/ | head -10
-   ```
-3. Present list and ask user to choose
+### Step 1: Parse Arguments and Find Handoff
+
+Parse `$ARGUMENTS` to determine the lookup method:
+
+1. **If full path provided** (contains `/` or ends with `.md`):
+   - Use the path directly
+   - Read the handoff document
+
+2. **If ticket number provided** (pattern like `ENG-1234`, `TICKET-123`):
+   - Look in `.opencode/thoughts/shared/handoffs/{TICKET}/`
+   - List directory contents to find handoffs
+   - If multiple files, use the most recent (based on timestamp in filename)
+   - If no files found, inform user and ask for path
+
+3. **If no arguments provided**:
+   - List recent handoffs from all directories:
+     ```bash
+     find .opencode/thoughts/shared/handoffs -name "*.md" -type f | head -20
+     ```
+   - Present list and ask user to choose
 
 ### Step 2: Load Handoff
 
 1. Read handoff document COMPLETELY
 2. Extract key information:
    - Original task description
+   - Ticket number (if any)
    - Completed vs remaining items
    - Critical context and decisions
    - Related artifacts (plan, research)
@@ -77,6 +96,7 @@ Spawn research if needed to verify:
 | Field             | Value     |
 | ----------------- | --------- |
 | Created           | [date]    |
+| Ticket            | [ticket or "none"] |
 | Branch            | [branch]  |
 | Commit at handoff | [commit]  |
 | Current commit    | [current] |
@@ -163,6 +183,34 @@ Handoff missing critical info:
 2. Research to fill gaps
 3. Document findings
 4. Continue with full context
+
+### Ticket Not Found
+
+If ticket directory doesn't exist or is empty:
+
+```markdown
+I couldn't find any handoffs for ticket `{TICKET}`.
+
+Available options:
+1. Check if the ticket number is correct
+2. Provide the full path to the handoff file
+3. Run `/resume` without arguments to see all available handoffs
+```
+
+## Directory Structure
+
+Handoffs are stored in:
+```
+.opencode/thoughts/shared/handoffs/
+├── ENG-2166/
+│   ├── 2025-01-08_13-55-22_ENG-2166_add-oauth-support.md
+│   └── 2025-01-09_10-30-00_ENG-2166_oauth-continuation.md
+├── TICKET-789/
+│   └── 2025-01-10_09-00-00_TICKET-789_fix-auth-bug.md
+└── general/
+    ├── 2025-01-07_14-20-00_refactor-utils.md
+    └── 2025-01-08_16-45-00_update-docs.md
+```
 
 ## Constraints
 

@@ -15,6 +15,13 @@ tools:
   edit: true
   write: true
   patch: false
+permissions:
+  edit:
+    ".opencode/thoughts/plans/*": "allow"
+    ".opencode/thoughts/shared/handoffs/*": "allow"
+  write:
+    ".opencode/thoughts/plans/*": "allow"
+    ".opencode/thoughts/shared/handoffs/*": "allow"
 ---
 
 # Plan (Humanlayer) Agent
