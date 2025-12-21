@@ -4,7 +4,7 @@
 
 You are implementing the first phase of a Research → Plan → Implement workflow system for OpenCode, based on HumanLayer's "Frequent Intentional Compaction" methodology.
 Primary Reference
-**Implementation Plan**: `.development/plans/phase-1-research-workflow-agents.md`
+**Implementation Plan**: `humanlayer-opencode/details/plans/phase-1-research-workflow-agents.md`
 Read this file completely before starting. It contains:
 
 - Exact file contents for all 6 files to create
@@ -12,9 +12,9 @@ Read this file completely before starting. It contains:
 - Success criteria
 - Testing instructions
   Supporting Research (Reference as Needed)
-- `.development/research/humanlayer-agent-research-report.md` - Full methodology
-- `.development/research/opencode-implementation-guide.md` - OpenCode format details
-- `.development/research/tool-comparison-opencode-vs-claude-code.md` - Tool mappings
+- `humanlayer-opencode/details/research/humanlayer-agent-research-report.md` - Full methodology
+- `humanlayer-opencode/details/research/opencode-implementation-guide.md` - OpenCode format details
+- `humanlayer-opencode/details/research/tool-comparison-opencode-vs-claude-code.md` - Tool mappings
   What to Create
   Directory Structure
 
@@ -87,5 +87,5 @@ The following manual tests can now be performed:
 
 [Any issues and how they were resolved, or "None"]
 Start
-Begin by reading .development/plans/phase-1-research-workflow-agents.md, then proceed with implementation.
+Begin by reading humanlayer-opencode/details/plans/phase-1-research-workflow-agents.md, then proceed with implementation.
 ```
