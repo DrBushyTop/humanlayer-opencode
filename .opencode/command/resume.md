@@ -35,7 +35,13 @@ Resume work from a handoff document, verifying current state and restoring conte
 
 1. If plan referenced, read it
 2. If research referenced, read it
-3. Note what context is available
+3. Spawn thoughts-locator to find other related documents:
+   - Use `subagent_type: "subagents/thoughts/thoughts-locator"`
+   - Search for documents related to the task topic
+4. Use thoughts-analyzer on highly relevant documents:
+   - Use `subagent_type: "subagents/thoughts/thoughts-analyzer"`
+   - Extract key decisions and constraints
+5. Note what context is available
 
 ### Step 4: Verify Current State
 

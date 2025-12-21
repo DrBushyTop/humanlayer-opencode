@@ -32,12 +32,24 @@ Task 3: pattern-finder
 - Find examples of similar patterns
 - Look for related implementations
 - Include test patterns
+
+Task 4: thoughts-locator
+- Find existing research/plans on this topic
+- Check for related handoffs
+- Return document locations and dates
+
+Task 5: thoughts-analyzer (if documents found)
+- Extract key insights from related documents
+- Identify decisions already made
+- Note constraints and specifications
 ```
 
-**IMPORTANT**: Launch all 3 tasks in parallel using the Task tool with:
+**IMPORTANT**: Launch all tasks in parallel using the Task tool with:
 - `subagent_type: "subagents/research/codebase-locator"`
 - `subagent_type: "subagents/research/codebase-analyzer"`
 - `subagent_type: "subagents/research/pattern-finder"`
+- `subagent_type: "subagents/thoughts/thoughts-locator"`
+- `subagent_type: "subagents/thoughts/thoughts-analyzer"` (only if thoughts-locator finds documents)
 
 ### Step 3: Synthesis
 1. Wait for ALL subagents to complete
@@ -65,6 +77,12 @@ Present the research findings in this format:
 
 ## Related Patterns
 [From pattern-finder]
+
+## Prior Research & Decisions
+[From thoughts-locator and thoughts-analyzer]
+- Previous research documents found
+- Key decisions already made
+- Constraints identified
 
 ## Code References
 - `path/to/file.ts:45` - [description]
