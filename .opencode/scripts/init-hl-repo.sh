@@ -35,172 +35,165 @@ fi
 
 BRANCH="${1:-master}"
 DEST_DIR="${2:-.opencode}"
+REPO="DrBushyTop/humanlayer-opencode"
+SOURCE_PREFIX=".opencode"
 
-# Get repository URL from git remote, convert to raw GitHub URL
-get_raw_base_url() {
-    local origin_url
-    origin_url=$(git remote get-url origin 2>/dev/null) || {
-        echo "Error: Not a git repository or no origin remote found" >&2
-        exit 1
-    }
-    
-    # Convert git URL to raw GitHub URL
-    # Handle both SSH and HTTPS formats
-    local repo_path
-    if [[ "$origin_url" == git@github.com:* ]]; then
-        repo_path="${origin_url#git@github.com:}"
-    elif [[ "$origin_url" == https://github.com/* ]]; then
-        repo_path="${origin_url#https://github.com/}"
-    else
-        echo "Error: Only GitHub repositories are supported" >&2
-        exit 1
-    fi
-    
-    # Remove .git suffix if present
-    repo_path="${repo_path%.git}"
-    
-    echo "https://raw.githubusercontent.com/${repo_path}/${BRANCH}"
+# Patterns to exclude from download
+EXCLUDE_PATTERNS=(
+    "node_modules/"
+    "bun.lock"
+    "package.json"
+)
+
+# Check if a path should be excluded
+should_exclude() {
+    local path="$1"
+    for pattern in "${EXCLUDE_PATTERNS[@]}"; do
+        if [[ "$path" == *"$pattern"* ]]; then
+            return 0
+        fi
+    done
+    return 1
 }
 
-# Fetch a file from the repository
-fetch_file() {
-    local remote_path="$1"
+# Fetch a file using available tools
+fetch_url() {
+    local url="$1"
+    if command -v curl &>/dev/null; then
+        curl -fsSL "$url" 2>/dev/null
+    elif command -v wget &>/dev/null; then
+        wget -qO- "$url" 2>/dev/null
+    elif command -v pwsh &>/dev/null; then
+        pwsh -Command "(Invoke-WebRequest -Uri '$url').Content" 2>/dev/null
+    else
+        echo "Error: No suitable download tool found (curl, wget, or pwsh required)" >&2
+        exit 1
+    fi
+}
+
+# Download a file to local path
+download_file() {
+    local url="$1"
     local local_path="$2"
-    local url="${BASE_URL}/${remote_path}"
     
     mkdir -p "$(dirname "$local_path")"
     
     if command -v curl &>/dev/null; then
         curl -fsSL "$url" -o "$local_path" 2>/dev/null && return 0
-    elif command -v pwsh &>/dev/null; then
-        pwsh -Command "Invoke-WebRequest -Uri '$url' -OutFile '$local_path'" 2>/dev/null && return 0
     elif command -v wget &>/dev/null; then
         wget -q "$url" -O "$local_path" 2>/dev/null && return 0
-    else
-        echo "Error: No suitable download tool found (curl, pwsh, or wget required)" >&2
-        exit 1
+    elif command -v pwsh &>/dev/null; then
+        pwsh -Command "Invoke-WebRequest -Uri '$url' -OutFile '$local_path'" 2>/dev/null && return 0
     fi
     
     return 1
 }
 
+# Parse JSON to extract file paths (simple grep-based parser for portability)
+# Works with GitHub's tree API response - only extracts blobs (files), not trees (directories)
+parse_tree_paths() {
+    local json="$1"
+    # Extract entries that are blobs (files) from .opencode directory
+    # The API returns: {"path": "...", "mode": "...", "type": "blob", ...}
+    # We need to match lines that have type "blob" and extract their paths
+    echo "$json" | tr ',' '\n' | grep -B5 '"type"[[:space:]]*:[[:space:]]*"blob"' | \
+        grep '"path"' | grep -oE '"path"[[:space:]]*:[[:space:]]*"[^"]*"' | \
+        sed 's/"path"[[:space:]]*:[[:space:]]*"//;s/"$//' | \
+        while read -r path; do
+            # Only include files from .opencode directory
+            if [[ "$path" == .opencode/* ]]; then
+                echo "$path"
+            fi
+        done
+}
+
 # Main script
 echo "Initializing HumanLayer .opencode workflow structure..."
+echo "Fetching from: github.com/${REPO} (branch: ${BRANCH})"
 
-# Check if we're using the humanlayer-opencode repo or need to specify it
-if git remote get-url origin 2>/dev/null | grep -q "humanlayer-opencode"; then
-    BASE_URL=$(get_raw_base_url)
-    SOURCE_PREFIX=".opencode"
-else
-    # Default to the humanlayer-opencode repository
-    BASE_URL="https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/${BRANCH}"
-    SOURCE_PREFIX=".opencode"
+# Get the tree SHA for the branch
+echo "Getting repository tree..."
+TREE_URL="https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1"
+TREE_JSON=$(fetch_url "$TREE_URL")
+
+if [[ -z "$TREE_JSON" ]] || [[ "$TREE_JSON" == *"Not Found"* ]]; then
+    echo "Error: Could not fetch repository tree. Check branch name and repository access." >&2
+    exit 1
 fi
 
-echo "Fetching from: ${BASE_URL}/${SOURCE_PREFIX}"
+# Extract file paths from the tree
+echo "Parsing file list..."
+FILES=$(parse_tree_paths "$TREE_JSON")
 
-# Create directory structure
-echo "Creating directory structure..."
-mkdir -p "${DEST_DIR}/agent/subagents/research"
-mkdir -p "${DEST_DIR}/agent/subagents/thoughts"
-mkdir -p "${DEST_DIR}/command"
-mkdir -p "${DEST_DIR}/scripts"
-mkdir -p "${DEST_DIR}/thoughts/research"
-mkdir -p "${DEST_DIR}/thoughts/plans"
-mkdir -p "${DEST_DIR}/thoughts/shared/handoffs/general"
+if [[ -z "$FILES" ]]; then
+    echo "Error: No files found in .opencode directory" >&2
+    exit 1
+fi
 
-# Files to fetch
-AGENT_RESEARCH_FILES=(
-    "codebase-locator.md"
-    "codebase-analyzer.md"
-    "pattern-finder.md"
-)
+# Count files (excluding filtered ones)
+TOTAL_FILES=0
+while IFS= read -r file; do
+    if ! should_exclude "$file"; then
+        ((TOTAL_FILES++)) || true
+    fi
+done <<< "$FILES"
 
-AGENT_THOUGHTS_FILES=(
-    "thoughts-locator.md"
-    "thoughts-analyzer.md"
-)
+echo "Found ${TOTAL_FILES} files to download"
+echo ""
 
-COMMAND_FILES=(
-    "research.md"
-    "plan.md"
-    "implement.md"
-    "iterate.md"
-    "validate.md"
-    "handoff.md"
-    "resume.md"
-)
+# Download each file
+DOWNLOADED=0
+FAILED=0
+RAW_BASE="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
 
-SCRIPT_FILES=(
-    "spec_metadata.sh"
-)
-
-ROOT_FILES=(
-    "README.md"
-    ".gitignore"
-)
-
-# Fetch agent files
-echo "Fetching agent files..."
-for file in "${AGENT_RESEARCH_FILES[@]}"; do
-    echo "  - agent/subagents/research/${file}"
-    fetch_file "${SOURCE_PREFIX}/agent/subagents/research/${file}" "${DEST_DIR}/agent/subagents/research/${file}" || \
-        echo "    Warning: Could not fetch ${file}"
-done
-
-for file in "${AGENT_THOUGHTS_FILES[@]}"; do
-    echo "  - agent/subagents/thoughts/${file}"
-    fetch_file "${SOURCE_PREFIX}/agent/subagents/thoughts/${file}" "${DEST_DIR}/agent/subagents/thoughts/${file}" || \
-        echo "    Warning: Could not fetch ${file}"
-done
-
-# Fetch command files
-echo "Fetching command files..."
-for file in "${COMMAND_FILES[@]}"; do
-    echo "  - command/${file}"
-    fetch_file "${SOURCE_PREFIX}/command/${file}" "${DEST_DIR}/command/${file}" || \
-        echo "    Warning: Could not fetch ${file}"
-done
-
-# Fetch script files
-echo "Fetching script files..."
-for file in "${SCRIPT_FILES[@]}"; do
-    echo "  - scripts/${file}"
-    fetch_file "${SOURCE_PREFIX}/scripts/${file}" "${DEST_DIR}/scripts/${file}" || \
-        echo "    Warning: Could not fetch ${file}"
-done
+while IFS= read -r file; do
+    # Skip excluded patterns
+    if should_exclude "$file"; then
+        continue
+    fi
+    
+    # Calculate local path (replace .opencode with destination dir)
+    local_path="${file/#.opencode/$DEST_DIR}"
+    
+    echo "  - ${file#.opencode/}"
+    
+    if download_file "${RAW_BASE}/${file}" "$local_path"; then
+        ((DOWNLOADED++)) || true
+    else
+        echo "    Warning: Failed to download"
+        ((FAILED++)) || true
+    fi
+done <<< "$FILES"
 
 # Make scripts executable
 chmod +x "${DEST_DIR}/scripts/"*.sh 2>/dev/null || true
 
-# Fetch root files
-echo "Fetching root files..."
-for file in "${ROOT_FILES[@]}"; do
-    echo "  - ${file}"
-    fetch_file "${SOURCE_PREFIX}/${file}" "${DEST_DIR}/${file}" || \
-        echo "    Warning: Could not fetch ${file}"
-done
-
 # Create .gitkeep files for empty directories
-echo "Creating .gitkeep files..."
+echo ""
+echo "Creating .gitkeep files for thoughts directories..."
+mkdir -p "${DEST_DIR}/thoughts/research"
+mkdir -p "${DEST_DIR}/thoughts/plans"
+mkdir -p "${DEST_DIR}/thoughts/shared/handoffs/general"
 touch "${DEST_DIR}/thoughts/research/.gitkeep"
 touch "${DEST_DIR}/thoughts/plans/.gitkeep"
 touch "${DEST_DIR}/thoughts/shared/handoffs/.gitkeep"
 touch "${DEST_DIR}/thoughts/shared/handoffs/general/.gitkeep"
 
 echo ""
-echo "HumanLayer .opencode workflow initialized successfully!"
+echo "============================================"
+echo "HumanLayer .opencode workflow initialized!"
+echo "============================================"
 echo ""
-echo "Structure created:"
-echo "  ${DEST_DIR}/"
-echo "  ├── agent/subagents/"
-echo "  │   ├── research/    # Research subagents"
-echo "  │   └── thoughts/    # Thoughts management subagents"
-echo "  ├── command/         # Slash commands"
-echo "  ├── scripts/         # Utility scripts"
-echo "  └── thoughts/        # Persistent artifacts"
+echo "Downloaded: ${DOWNLOADED} files"
+if [[ $FAILED -gt 0 ]]; then
+    echo "Failed: ${FAILED} files"
+fi
+echo ""
+echo "Structure created in: ${DEST_DIR}/"
 echo ""
 echo "Next steps:"
-echo "  1. Review ${DEST_DIR}/README.md for usage guide"
+echo "  1. Restart OpenCode to load the new commands and agents"
 echo "  2. Try /research [topic] to explore your codebase"
 echo "  3. Use /plan [feature] to plan your first implementation"
+echo ""
+echo "For more information, see: https://github.com/${REPO}"

@@ -29,6 +29,8 @@ After installation, restart OpenCode for the commands and agents to become avail
 
 ### Commands
 
+**Core Workflow:**
+
 | Command | Description |
 |---------|-------------|
 | `/research [topic]` | Comprehensive codebase research with parallel subagents |
@@ -38,6 +40,20 @@ After installation, restart OpenCode for the commands and agents to become avail
 | `/validate [plan]` | Verify implementation matches the plan |
 | `/handoff [ticket]` | Create session handoff for continuity |
 | `/resume [handoff]` | Resume work from a previous handoff |
+
+**Git Workflow:**
+
+| Command | Description |
+|---------|-------------|
+| `/commit` | Create a well-structured git commit |
+| `/describe-pr` | Generate PR description from changes |
+| `/local-review` | Review changes before committing |
+
+**Utility:**
+
+| Command | Description |
+|---------|-------------|
+| `/oneshot [task]` | Quick single-shot task execution |
 
 ### Subagents
 
@@ -81,29 +97,36 @@ After initialization:
 
 ```
 .opencode/
-├── agent/subagents/
-│   ├── research/           # Codebase research agents
-│   │   ├── codebase-analyzer.md
-│   │   ├── codebase-locator.md
-│   │   └── pattern-finder.md
-│   └── thoughts/           # Document management agents
-│       ├── thoughts-analyzer.md
-│       └── thoughts-locator.md
-├── command/                # Slash commands
+├── agent/
+│   ├── plan-humanlayer.md      # Planning orchestrator agent
+│   ├── research-humanlayer.md  # Research orchestrator agent
+│   └── subagents/
+│       ├── research/           # Codebase research agents
+│       │   ├── codebase-analyzer.md
+│       │   ├── codebase-locator.md
+│       │   └── pattern-finder.md
+│       └── thoughts/           # Document management agents
+│           ├── thoughts-analyzer.md
+│           └── thoughts-locator.md
+├── command/                    # Slash commands
 │   ├── research.md
 │   ├── plan.md
 │   ├── implement.md
 │   ├── iterate.md
 │   ├── validate.md
 │   ├── handoff.md
-│   └── resume.md
-├── scripts/                # Utility scripts
+│   ├── resume.md
+│   ├── commit.md
+│   ├── describe-pr.md
+│   ├── local-review.md
+│   └── oneshot.md
+├── scripts/                    # Utility scripts
 │   ├── init-hl-repo.sh
 │   └── spec_metadata.sh
-└── thoughts/               # Persistent artifacts
-    ├── research/           # Research documents
-    ├── plans/              # Implementation plans
-    └── shared/handoffs/    # Session handoffs
+└── thoughts/                   # Persistent artifacts
+    ├── research/               # Research documents
+    ├── plans/                  # Implementation plans
+    └── shared/handoffs/        # Session handoffs
 ```
 
 ## Usage Examples
