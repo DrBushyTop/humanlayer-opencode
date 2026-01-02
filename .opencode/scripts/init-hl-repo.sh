@@ -213,9 +213,9 @@ download_file() {
     mkdir -p "$(dirname "$local_path")"
     
     if command -v curl &>/dev/null; then
-        curl -fsSL "$url" -o "$local_path" 2>/dev/null && return 0
-    elif command -v wget &>/dev/null; then
-        wget -q "$url" -O "$local_path" 2>/dev/null && return 0
+         curl -fsSL "$url" -o "$local_path" --create-dirs 2>/dev/null && return 0
+     elif command -v wget &>/dev/null; then
+         wget -q "$url" -O "$local_path" 2>/dev/null && return 0
     elif command -v pwsh &>/dev/null; then
         pwsh -Command "Invoke-WebRequest -Uri '$url' -OutFile '$local_path'" 2>/dev/null && return 0
     fi
@@ -363,6 +363,9 @@ done <<< "$FILES"
 
 # Make scripts executable
 chmod +x "${DEST_DIR}/scripts/"*.sh 2>/dev/null || true
+
+# Ensure all downloaded files are writable (in case they're being overwritten)
+find "${DEST_DIR}" -type f -exec chmod +w {} \; 2>/dev/null || true
 
 # ============================================
 # Step 3: Configure agent models with selected values
