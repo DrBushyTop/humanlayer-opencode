@@ -245,6 +245,68 @@ parse_tree_paths() {
 echo "Initializing HumanLayer .opencode workflow structure..."
 echo "Fetching from: github.com/${REPO} (branch: ${BRANCH})"
 
+# ============================================
+# Step 1: Get available models BEFORE downloading files
+# (downloading files with placeholders would break opencode)
+# ============================================
+SELECTED_MODEL_PRIMARY=""
+SELECTED_MODEL_SUBAGENT=""
+AVAILABLE_MODELS=""
+
+if can_interact; then
+    AVAILABLE_MODELS=$(get_available_models)
+    
+    if [[ -n "$AVAILABLE_MODELS" ]]; then
+        echo ""
+        echo "============================================"
+        echo "Model Selection"
+        echo "============================================"
+        echo ""
+        echo "OpenCode detected. Available models:"
+        echo "$AVAILABLE_MODELS" | sed 's/^/  /'
+        
+        # Select primary agent model
+        select_model "Select model for PRIMARY agents (research, plan):" "$AVAILABLE_MODELS" SELECTED_MODEL_PRIMARY
+        
+        # Ask if user wants same model for subagents
+        echo ""
+        if [[ -n "$SELECTED_MODEL_PRIMARY" ]]; then
+            printf "Use same model for SUBAGENTS? [Y/n]: "
+            read same_model </dev/tty
+            if [[ "$same_model" =~ ^[Nn] ]]; then
+                select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
+            else
+                SELECTED_MODEL_SUBAGENT="$SELECTED_MODEL_PRIMARY"
+                echo "  → Using same model for subagents: $SELECTED_MODEL_SUBAGENT"
+            fi
+        else
+            printf "Select a model for SUBAGENTS anyway? [y/N]: "
+            read select_subagent </dev/tty
+            if [[ "$select_subagent" =~ ^[Yy] ]]; then
+                select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
+            fi
+        fi
+        echo ""
+    else
+        echo ""
+        echo "Note: OpenCode not found or no models available."
+        echo "Agent files will use default model configuration."
+        echo "You can manually set models in ${DEST_DIR}/agent/*.md files after installation."
+        echo ""
+    fi
+else
+    # Non-interactive mode (no tty available at all)
+    echo ""
+    echo "Non-interactive mode detected."
+    echo "Agent model placeholders will be removed. You can configure models manually"
+    echo "in ${DEST_DIR}/agent/*.md files after installation."
+    echo ""
+fi
+
+# ============================================
+# Step 2: Fetch repository tree and download files
+# ============================================
+
 # Get the tree SHA for the branch
 echo "Getting repository tree..."
 TREE_URL="https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1"
@@ -302,62 +364,10 @@ done <<< "$FILES"
 # Make scripts executable
 chmod +x "${DEST_DIR}/scripts/"*.sh 2>/dev/null || true
 
-# Model selection (only if running interactively via tty or /dev/tty)
-SELECTED_MODEL_PRIMARY=""
-SELECTED_MODEL_SUBAGENT=""
-
-if can_interact; then
-    # Check if opencode is available
-    AVAILABLE_MODELS=$(get_available_models)
-    
-    if [[ -n "$AVAILABLE_MODELS" ]]; then
-        echo ""
-        echo "============================================"
-        echo "Model Selection"
-        echo "============================================"
-        echo ""
-        echo "OpenCode detected. Available models:"
-        echo "$AVAILABLE_MODELS" | sed 's/^/  /'
-        
-        # Select primary agent model
-        select_model "Select model for PRIMARY agents (research, plan):" "$AVAILABLE_MODELS" SELECTED_MODEL_PRIMARY
-        
-        # Ask if user wants same model for subagents
-        echo ""
-        if [[ -n "$SELECTED_MODEL_PRIMARY" ]]; then
-            printf "Use same model for SUBAGENTS? [Y/n]: "
-            read same_model </dev/tty
-            if [[ "$same_model" =~ ^[Nn] ]]; then
-                select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
-            else
-                SELECTED_MODEL_SUBAGENT="$SELECTED_MODEL_PRIMARY"
-                echo "  → Using same model for subagents: $SELECTED_MODEL_SUBAGENT"
-            fi
-        else
-            printf "Select a model for SUBAGENTS anyway? [y/N]: "
-            read select_subagent </dev/tty
-            if [[ "$select_subagent" =~ ^[Yy] ]]; then
-                select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
-            fi
-        fi
-        
-        # Configure agent files with selected models
-        configure_agent_models "$DEST_DIR" "$SELECTED_MODEL_PRIMARY" "$SELECTED_MODEL_SUBAGENT"
-    else
-        echo ""
-        echo "Note: OpenCode not found or no models available."
-        echo "Agent files will use default model configuration."
-        echo "You can manually set models in ${DEST_DIR}/agent/*.md files."
-        # Remove placeholder lines since we can't configure them
-        configure_agent_models "$DEST_DIR" "" ""
-    fi
-else
-    # Non-interactive mode (no tty available at all): remove placeholders
-    echo ""
-    echo "Non-interactive mode: removing model placeholders."
-    echo "You can manually set models in ${DEST_DIR}/agent/*.md files."
-    configure_agent_models "$DEST_DIR" "" ""
-fi
+# ============================================
+# Step 3: Configure agent models with selected values
+# ============================================
+configure_agent_models "$DEST_DIR" "$SELECTED_MODEL_PRIMARY" "$SELECTED_MODEL_SUBAGENT"
 
 # Create .gitkeep files for empty directories
 echo ""
