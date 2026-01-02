@@ -24,7 +24,7 @@
 #   # Use specific branch and custom directory
 #   ./init-hl-repo.sh main my-opencode
 #
-#   # One-liner installation (curl) - NOTE: model selection requires terminal
+#   # One-liner installation (curl)
 #   curl -fsSL https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/master/.opencode/scripts/init-hl-repo.sh | bash
 #
 #   # One-liner with specific branch
@@ -34,7 +34,7 @@ set -e
 
 # Show help if requested
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-    sed -n '2,27p' "$0" | sed 's/^# //' | sed 's/^#//'
+    sed -n '2,31p' "$0" | sed 's/^# //' | sed 's/^#//'
     exit 0
 fi
 
@@ -78,8 +78,14 @@ get_available_models() {
     fi
 }
 
+# Check if we can run interactively (either stdin is tty, or /dev/tty exists)
+can_interact() {
+    [[ -t 0 ]] || [[ -e /dev/tty ]]
+}
+
 # Interactive model selection using select
 # Args: $1 = prompt, $2 = models (newline separated), $3 = variable name to set
+# Note: Uses /dev/tty for input to work even when script is piped via curl
 select_model() {
     local prompt="$1"
     local models="$2"
@@ -98,10 +104,22 @@ select_model() {
     # Add skip option
     model_array+=("[Skip - remove model field from agents]")
     
-    # Use select for interactive menu
-    PS3="Enter number (1-${#model_array[@]}): "
-    select choice in "${model_array[@]}"; do
-        if [[ -n "$choice" ]]; then
+    # Display numbered menu
+    local i=1
+    for item in "${model_array[@]}"; do
+        echo "  $i) $item"
+        ((i++))
+    done
+    echo ""
+    
+    # Read selection from /dev/tty to work with curl | bash
+    while true; do
+        printf "Enter number (1-${#model_array[@]}): "
+        local selection
+        read selection </dev/tty
+        
+        if [[ "$selection" =~ ^[0-9]+$ ]] && (( selection >= 1 && selection <= ${#model_array[@]} )); then
+            local choice="${model_array[$((selection-1))]}"
             if [[ "$choice" == "[Skip - remove model field from agents]" ]]; then
                 eval "$varname=''"
                 echo "  → Skipping model selection"
@@ -111,7 +129,7 @@ select_model() {
             fi
             break
         else
-            echo "Invalid selection. Please try again."
+            echo "  Invalid selection. Please enter a number between 1 and ${#model_array[@]}."
         fi
     done
 }
@@ -284,11 +302,11 @@ done <<< "$FILES"
 # Make scripts executable
 chmod +x "${DEST_DIR}/scripts/"*.sh 2>/dev/null || true
 
-# Model selection (only if running interactively)
+# Model selection (only if running interactively via tty or /dev/tty)
 SELECTED_MODEL_PRIMARY=""
 SELECTED_MODEL_SUBAGENT=""
 
-if [[ -t 0 ]]; then
+if can_interact; then
     # Check if opencode is available
     AVAILABLE_MODELS=$(get_available_models)
     
@@ -307,7 +325,8 @@ if [[ -t 0 ]]; then
         # Ask if user wants same model for subagents
         echo ""
         if [[ -n "$SELECTED_MODEL_PRIMARY" ]]; then
-            read -p "Use same model for SUBAGENTS? [Y/n]: " same_model
+            printf "Use same model for SUBAGENTS? [Y/n]: "
+            read same_model </dev/tty
             if [[ "$same_model" =~ ^[Nn] ]]; then
                 select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
             else
@@ -315,7 +334,8 @@ if [[ -t 0 ]]; then
                 echo "  → Using same model for subagents: $SELECTED_MODEL_SUBAGENT"
             fi
         else
-            read -p "Select a model for SUBAGENTS anyway? [y/N]: " select_subagent
+            printf "Select a model for SUBAGENTS anyway? [y/N]: "
+            read select_subagent </dev/tty
             if [[ "$select_subagent" =~ ^[Yy] ]]; then
                 select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
             fi
@@ -332,7 +352,7 @@ if [[ -t 0 ]]; then
         configure_agent_models "$DEST_DIR" "" ""
     fi
 else
-    # Non-interactive mode: remove placeholders
+    # Non-interactive mode (no tty available at all): remove placeholders
     echo ""
     echo "Non-interactive mode: removing model placeholders."
     echo "You can manually set models in ${DEST_DIR}/agent/*.md files."
