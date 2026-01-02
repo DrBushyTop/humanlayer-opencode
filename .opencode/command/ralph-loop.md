@@ -46,11 +46,13 @@ When the loop is active, the plugin will automatically re-prompt you with the sa
 **If a completion promise was set:**
 
 To complete the loop, output the EXACT text:
+
 ```
 <promise>YOUR_PROMISE_TEXT</promise>
 ```
 
 **STRICT REQUIREMENTS (DO NOT VIOLATE):**
+
 - Use `<promise>` XML tags EXACTLY as shown above
 - The statement MUST be completely and unequivocally TRUE
 - Do NOT output false statements to exit the loop

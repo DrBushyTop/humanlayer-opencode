@@ -187,6 +187,17 @@ Creates a handoff document capturing current state for session continuity.
 
 The AI will work iteratively until it outputs `<promise>API COMPLETE</promise>` or reaches 20 iterations. Each iteration sees previous work in files.
 
+**CLI Mode:** For command-line usage, use the dedicated script:
+
+```bash
+# Basic usage
+.opencode/scripts/ralph-loop-cli.sh "Build API" --max 5 --promise "DONE"
+
+# With a running server (faster)
+opencode serve  # In another terminal
+.opencode/scripts/ralph-loop-cli.sh "Build API" --max 5 --promise "DONE" --attach http://localhost:4096
+```
+
 ## References
 
 - [HumanLayer Context Engineering](https://github.com/humanlayer/humanlayer)
