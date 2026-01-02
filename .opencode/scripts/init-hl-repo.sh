@@ -9,6 +9,11 @@
 #   branch    - Git branch to fetch from (default: master)
 #   dest-dir  - Destination directory (default: .opencode)
 #
+# Features:
+#   - Downloads .opencode workflow structure from the repository
+#   - Interactive model selection for agents (if opencode CLI is available)
+#   - Supports primary agents (research, plan) and subagents separately
+#
 # Examples:
 #   # Initialize with defaults (master branch, .opencode directory)
 #   ./init-hl-repo.sh
@@ -19,7 +24,7 @@
 #   # Use specific branch and custom directory
 #   ./init-hl-repo.sh main my-opencode
 #
-#   # One-liner installation (curl)
+#   # One-liner installation (curl) - NOTE: model selection requires terminal
 #   curl -fsSL https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/master/.opencode/scripts/init-hl-repo.sh | bash
 #
 #   # One-liner with specific branch
@@ -45,6 +50,14 @@ EXCLUDE_PATTERNS=(
     "package.json"
 )
 
+# Model placeholders in agent files
+MODEL_PRIMARY_PLACEHOLDER="{{MODEL_PRIMARY}}"
+MODEL_SUBAGENT_PLACEHOLDER="{{MODEL_SUBAGENT}}"
+
+# Default models (used when opencode is not available or user skips selection)
+DEFAULT_MODEL_PRIMARY=""
+DEFAULT_MODEL_SUBAGENT=""
+
 # Check if a path should be excluded
 should_exclude() {
     local path="$1"
@@ -54,6 +67,109 @@ should_exclude() {
         fi
     done
     return 1
+}
+
+# Get available models from opencode
+get_available_models() {
+    if command -v opencode &>/dev/null; then
+        opencode models 2>/dev/null | grep -v "^$"
+    else
+        echo ""
+    fi
+}
+
+# Interactive model selection using select
+# Args: $1 = prompt, $2 = models (newline separated), $3 = variable name to set
+select_model() {
+    local prompt="$1"
+    local models="$2"
+    local varname="$3"
+    
+    echo ""
+    echo "$prompt"
+    echo ""
+    
+    # Convert models to array
+    local model_array=()
+    while IFS= read -r model; do
+        [[ -n "$model" ]] && model_array+=("$model")
+    done <<< "$models"
+    
+    # Add skip option
+    model_array+=("[Skip - remove model field from agents]")
+    
+    # Use select for interactive menu
+    PS3="Enter number (1-${#model_array[@]}): "
+    select choice in "${model_array[@]}"; do
+        if [[ -n "$choice" ]]; then
+            if [[ "$choice" == "[Skip - remove model field from agents]" ]]; then
+                eval "$varname=''"
+                echo "  → Skipping model selection"
+            else
+                eval "$varname='$choice'"
+                echo "  → Selected: $choice"
+            fi
+            break
+        else
+            echo "Invalid selection. Please try again."
+        fi
+    done
+}
+
+# Replace model placeholders in agent files
+configure_agent_models() {
+    local dest_dir="$1"
+    local model_primary="$2"
+    local model_subagent="$3"
+    
+    echo ""
+    echo "Configuring agent models..."
+    
+    # Find all agent markdown files
+    local agent_files
+    agent_files=$(find "$dest_dir/agent" -name "*.md" 2>/dev/null)
+    
+    for file in $agent_files; do
+        if [[ -f "$file" ]]; then
+            local filename=$(basename "$file")
+            
+            if [[ -n "$model_primary" ]] && grep -q "$MODEL_PRIMARY_PLACEHOLDER" "$file" 2>/dev/null; then
+                # Replace primary model placeholder
+                if [[ "$(uname)" == "Darwin" ]]; then
+                    sed -i '' "s|$MODEL_PRIMARY_PLACEHOLDER|$model_primary|g" "$file"
+                else
+                    sed -i "s|$MODEL_PRIMARY_PLACEHOLDER|$model_primary|g" "$file"
+                fi
+                echo "  - $filename: primary model → $model_primary"
+            elif [[ -z "$model_primary" ]] && grep -q "$MODEL_PRIMARY_PLACEHOLDER" "$file" 2>/dev/null; then
+                # Remove the model line entirely if no model selected
+                if [[ "$(uname)" == "Darwin" ]]; then
+                    sed -i '' "/model: $MODEL_PRIMARY_PLACEHOLDER/d" "$file"
+                else
+                    sed -i "/model: $MODEL_PRIMARY_PLACEHOLDER/d" "$file"
+                fi
+                echo "  - $filename: removed model field"
+            fi
+            
+            if [[ -n "$model_subagent" ]] && grep -q "$MODEL_SUBAGENT_PLACEHOLDER" "$file" 2>/dev/null; then
+                # Replace subagent model placeholder
+                if [[ "$(uname)" == "Darwin" ]]; then
+                    sed -i '' "s|$MODEL_SUBAGENT_PLACEHOLDER|$model_subagent|g" "$file"
+                else
+                    sed -i "s|$MODEL_SUBAGENT_PLACEHOLDER|$model_subagent|g" "$file"
+                fi
+                echo "  - $filename: subagent model → $model_subagent"
+            elif [[ -z "$model_subagent" ]] && grep -q "$MODEL_SUBAGENT_PLACEHOLDER" "$file" 2>/dev/null; then
+                # Remove the model line entirely if no model selected
+                if [[ "$(uname)" == "Darwin" ]]; then
+                    sed -i '' "/model: $MODEL_SUBAGENT_PLACEHOLDER/d" "$file"
+                else
+                    sed -i "/model: $MODEL_SUBAGENT_PLACEHOLDER/d" "$file"
+                fi
+                echo "  - $filename: removed model field"
+            fi
+        fi
+    done
 }
 
 # Fetch a file using available tools
@@ -168,6 +284,61 @@ done <<< "$FILES"
 # Make scripts executable
 chmod +x "${DEST_DIR}/scripts/"*.sh 2>/dev/null || true
 
+# Model selection (only if running interactively)
+SELECTED_MODEL_PRIMARY=""
+SELECTED_MODEL_SUBAGENT=""
+
+if [[ -t 0 ]]; then
+    # Check if opencode is available
+    AVAILABLE_MODELS=$(get_available_models)
+    
+    if [[ -n "$AVAILABLE_MODELS" ]]; then
+        echo ""
+        echo "============================================"
+        echo "Model Selection"
+        echo "============================================"
+        echo ""
+        echo "OpenCode detected. Available models:"
+        echo "$AVAILABLE_MODELS" | sed 's/^/  /'
+        
+        # Select primary agent model
+        select_model "Select model for PRIMARY agents (research, plan):" "$AVAILABLE_MODELS" SELECTED_MODEL_PRIMARY
+        
+        # Ask if user wants same model for subagents
+        echo ""
+        if [[ -n "$SELECTED_MODEL_PRIMARY" ]]; then
+            read -p "Use same model for SUBAGENTS? [Y/n]: " same_model
+            if [[ "$same_model" =~ ^[Nn] ]]; then
+                select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
+            else
+                SELECTED_MODEL_SUBAGENT="$SELECTED_MODEL_PRIMARY"
+                echo "  → Using same model for subagents: $SELECTED_MODEL_SUBAGENT"
+            fi
+        else
+            read -p "Select a model for SUBAGENTS anyway? [y/N]: " select_subagent
+            if [[ "$select_subagent" =~ ^[Yy] ]]; then
+                select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
+            fi
+        fi
+        
+        # Configure agent files with selected models
+        configure_agent_models "$DEST_DIR" "$SELECTED_MODEL_PRIMARY" "$SELECTED_MODEL_SUBAGENT"
+    else
+        echo ""
+        echo "Note: OpenCode not found or no models available."
+        echo "Agent files will use default model configuration."
+        echo "You can manually set models in ${DEST_DIR}/agent/*.md files."
+        # Remove placeholder lines since we can't configure them
+        configure_agent_models "$DEST_DIR" "" ""
+    fi
+else
+    # Non-interactive mode: remove placeholders
+    echo ""
+    echo "Non-interactive mode: removing model placeholders."
+    echo "You can manually set models in ${DEST_DIR}/agent/*.md files."
+    configure_agent_models "$DEST_DIR" "" ""
+fi
+
 # Create .gitkeep files for empty directories
 echo ""
 echo "Creating .gitkeep files for thoughts directories..."
@@ -191,9 +362,22 @@ fi
 echo ""
 echo "Structure created in: ${DEST_DIR}/"
 echo ""
+if [[ -n "$SELECTED_MODEL_PRIMARY" ]] || [[ -n "$SELECTED_MODEL_SUBAGENT" ]]; then
+    echo "Models configured:"
+    if [[ -n "$SELECTED_MODEL_PRIMARY" ]]; then
+        echo "  Primary agents: ${SELECTED_MODEL_PRIMARY}"
+    fi
+    if [[ -n "$SELECTED_MODEL_SUBAGENT" ]]; then
+        echo "  Subagents:      ${SELECTED_MODEL_SUBAGENT}"
+    fi
+    echo ""
+fi
 echo "Next steps:"
 echo "  1. Restart OpenCode to load the new commands and agents"
 echo "  2. Try /research [topic] to explore your codebase"
 echo "  3. Use /plan [feature] to plan your first implementation"
+if [[ -z "$SELECTED_MODEL_PRIMARY" ]] && [[ -z "$SELECTED_MODEL_SUBAGENT" ]]; then
+    echo "  4. (Optional) Configure agent models in ${DEST_DIR}/agent/*.md"
+fi
 echo ""
 echo "For more information, see: https://github.com/${REPO}"

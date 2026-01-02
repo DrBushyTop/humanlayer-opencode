@@ -1,5 +1,6 @@
 ---
 description: "Research mode - explore and document codebases without making changes"
+model: {{MODEL_PRIMARY}}
 mode: primary
 temperature: 0.1
 tools:

@@ -1,5 +1,6 @@
 ---
 description: "Find examples of existing patterns in the codebase for templates and inspiration"
+model: {{MODEL_SUBAGENT}}
 mode: subagent
 temperature: 0.1
 tools:

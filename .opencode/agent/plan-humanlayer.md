@@ -1,5 +1,6 @@
 ---
 description: "Planning mode - create detailed implementation plans without making changes"
+model: {{MODEL_PRIMARY}}
 mode: primary
 temperature: 0.1
 tools:

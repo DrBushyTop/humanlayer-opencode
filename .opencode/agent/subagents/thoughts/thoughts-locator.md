@@ -1,5 +1,6 @@
 ---
 description: "Find documents in thoughts directory - locations only, no content analysis"
+model: {{MODEL_SUBAGENT}}
 mode: subagent
 temperature: 0.1
 tools:

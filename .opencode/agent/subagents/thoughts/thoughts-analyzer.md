@@ -1,5 +1,6 @@
 ---
 description: "Extract key insights from thoughts documents"
+model: {{MODEL_SUBAGENT}}
 mode: subagent
 temperature: 0.1
 tools:
