@@ -26,9 +26,30 @@ function debugLog(...args: any[]) {
   }
 }
 
-export const RalphLoopPlugin: Plugin = async ({ client, directory, $ }) => {
+export const RalphLoopPlugin: Plugin = async ({ client, directory, serverUrl, $ }) => {
   // Helper: Get full state file path
   const getStatePath = () => `${directory}/${STATE_FILE}`;
+
+  // Direct fetch to show toast, bypassing SDK wrapper which has a bug
+  const showToast = async (options: {
+    title?: string;
+    message: string;
+    variant: "info" | "success" | "warning" | "error";
+    duration?: number;
+  }) => {
+    const url = new URL("/tui/show-toast", serverUrl);
+    url.searchParams.set("directory", directory);
+    
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(options),
+      });
+    } catch (e) {
+      debugLog("Failed to show toast:", e);
+    }
+  };
 
   // Helper: Load state from JSON file
   const loadState = async (): Promise<LoopState | null> => {
@@ -170,7 +191,7 @@ export const RalphLoopPlugin: Plugin = async ({ client, directory, $ }) => {
 
           if (extractedPromise === state.completionPromise) {
             debugLog("Completion promise detected! Ending loop.");
-            await client.tui.showToast({
+            await showToast({
               title: "Ralph Loop Complete",
               message: `Promise fulfilled: ${state.completionPromise} (${state.iteration} iteration${state.iteration !== 1 ? "s" : ""})`,
               variant: "success",
@@ -184,7 +205,7 @@ export const RalphLoopPlugin: Plugin = async ({ client, directory, $ }) => {
         // Now check max iterations (after completion check)
         if (state.maxIterations > 0 && state.iteration >= state.maxIterations) {
           debugLog("Max iterations reached, ending loop");
-          await client.tui.showToast({
+          await showToast({
             title: "Ralph Loop Complete",
             message: `Max iterations (${state.maxIterations}) reached without completion`,
             variant: "warning",
@@ -203,7 +224,7 @@ export const RalphLoopPlugin: Plugin = async ({ client, directory, $ }) => {
         debugLog(`Saved state with iteration ${state.iteration}, messageCount ${messageCount}`);
 
         // Show progress toast
-        await client.tui.showToast({
+        await showToast({
           title: "Ralph Loop",
           message: `Starting iteration ${state.iteration}${
             state.maxIterations > 0 ? ` of ${state.maxIterations}` : ""
@@ -235,7 +256,7 @@ export const RalphLoopPlugin: Plugin = async ({ client, directory, $ }) => {
         debugLog("Prompt sent successfully");
       } catch (e) {
         debugLog("Error in event handler:", e);
-        await client.tui.showToast({
+        await showToast({
           title: "Ralph Loop Error",
           message: String(e),
           variant: "error",
@@ -288,7 +309,7 @@ export const RalphLoopPlugin: Plugin = async ({ client, directory, $ }) => {
           debugLog("Loop started, state saved");
 
           // Show toast notification
-          await client.tui.showToast({
+          await showToast({
             title: "Ralph Loop Started",
             message: `Iteration 1${state.maxIterations > 0 ? ` of ${state.maxIterations}` : " (unlimited)"}`,
             variant: "info",
@@ -333,7 +354,7 @@ To complete the loop, output:
           const iterations = state.iteration;
           await deleteState();
 
-          await client.tui.showToast({
+          await showToast({
             title: "Ralph Loop Cancelled",
             message: `Stopped after ${iterations} iteration${iterations !== 1 ? "s" : ""}`,
             variant: "warning",
