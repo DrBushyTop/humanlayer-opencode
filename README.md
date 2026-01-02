@@ -55,6 +55,15 @@ After installation, restart OpenCode for the commands and agents to become avail
 |---------|-------------|
 | `/oneshot [task]` | Quick single-shot task execution |
 
+**Ralph Loop (Iterative Development):**
+
+| Command | Description |
+|---------|-------------|
+| `/ralph-loop [prompt] [options]` | Start iterative AI loop until completion |
+| `/cancel-ralph` | Cancel active Ralph loop |
+| `/ralph-status` | Check Ralph loop status |
+| `/ralph-help` | Explain Ralph Wiggum technique |
+
 ### Subagents
 
 **Research Agents:**
@@ -169,6 +178,14 @@ Executes the plan phase by phase, pausing for human verification after each phas
 ```
 
 Creates a handoff document capturing current state for session continuity.
+
+### Iterative Development with Ralph Loop
+
+```
+/ralph-loop Build a REST API with tests --max 20 --promise "API COMPLETE"
+```
+
+The AI will work iteratively until it outputs `<promise>API COMPLETE</promise>` or reaches 20 iterations. Each iteration sees previous work in files.
 
 ## References
 

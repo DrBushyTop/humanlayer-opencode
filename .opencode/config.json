@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "tools": {
+    "ralph-loop-start": true,
+    "ralph-loop-cancel": true,
+    "ralph-loop-status": true
+  }
+}

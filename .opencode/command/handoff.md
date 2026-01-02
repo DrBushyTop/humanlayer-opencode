@@ -1,6 +1,6 @@
 ---
 description: "Create handoff document for session continuity"
-subtask: true
+subtask: false
 tools:
   bash: true
 ---
@@ -10,6 +10,7 @@ tools:
 Create a handoff document. Optional arguments: `$ARGUMENTS`
 
 **Argument formats:**
+
 - `/handoff` - Create handoff with auto-generated description
 - `/handoff some description` - Create handoff with given description
 - `/handoff TICKET-123` - Create handoff for ticket TICKET-123
@@ -32,6 +33,7 @@ Create a comprehensive handoff document that captures current work state, enabli
 ### Step 1: Parse Arguments
 
 Parse `$ARGUMENTS` to extract:
+
 1. **Ticket number** (optional): Pattern like `ENG-1234`, `TICKET-123`, `ISSUE-456`, etc.
 2. **Description** (optional): Remaining text after ticket extraction
 
@@ -52,6 +54,7 @@ Examples:
 ```
 
 This provides:
+
 - `Current Date/Time (TZ)` - ISO timestamp with timezone
 - `Current Git Commit Hash` - for frontmatter
 - `Current Branch Name` - for frontmatter
@@ -88,6 +91,7 @@ date '+%Y-%m-%d_%H-%M-%S'       # timestamp for filename
 - **Without ticket**: `.opencode/thoughts/shared/handoffs/general/YYYY-MM-DD_HH-MM-SS_{slug}.md`
 
 **Examples**:
+
 - With ticket: `.opencode/thoughts/shared/handoffs/ENG-2166/2025-01-08_13-55-22_ENG-2166_add-oauth-support.md`
 - Without ticket: `.opencode/thoughts/shared/handoffs/general/2025-01-08_13-55-22_add-oauth-support.md`
 
@@ -163,15 +167,18 @@ related_research: "[path to research if exists]"
 - **Previous Handoff**: `[path if exists]`
 
 ## How to Resume
-
 ```
+
 /resume [path-to-this-file]
+
 ```
 
 Or by ticket:
 
 ```
+
 /resume [TICKET]
+
 ```
 
 ## Immediate Next Steps
@@ -211,12 +218,16 @@ mkdir -p .opencode/thoughts/shared/handoffs/{TICKET-or-general}
 
 By path:
 ```
+
 /resume .opencode/thoughts/shared/handoffs/{path}
+
 ```
 
 By ticket (if applicable):
 ```
+
 /resume {TICKET}
+
 ```
 
 Session can now be safely ended.
