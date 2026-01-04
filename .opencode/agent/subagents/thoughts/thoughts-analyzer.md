@@ -3,14 +3,14 @@ description: "Extract key insights from thoughts documents"
 model: {{MODEL_SUBAGENT}}
 mode: subagent
 temperature: 0.1
-tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
-  bash: false
-  edit: false
-  write: false
+permission:
+  read: "allow"
+  grep: "allow"
+  glob: "allow"
+  list: "allow"
+  bash: "deny"
+  edit: "deny"
+  write: "deny"
 ---
 
 # Thoughts Analyzer Agent

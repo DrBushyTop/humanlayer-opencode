@@ -3,14 +3,14 @@ description: "Understand HOW specific code works - data flow, dependencies, patt
 model: {{MODEL_SUBAGENT}}
 mode: subagent
 temperature: 0.1
-tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
-  bash: false
-  edit: false
-  write: false
+permission:
+  read: "allow"
+  grep: "allow"
+  glob: "allow"
+  list: "allow"
+  bash: "deny"
+  edit: "deny"
+  write: "deny"
 ---
 
 # Codebase Analyzer Agent

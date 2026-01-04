@@ -3,28 +3,27 @@ description: "Planning mode - create detailed implementation plans without makin
 model: {{MODEL_PRIMARY}}
 mode: primary
 temperature: 0.1
-tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
-  task: true
-  todowrite: true
-  todoread: true
-  webfetch: true
-  bash: true
-  edit: true
-  write: true
-permissions:
-  edit:
-    ".opencode/thoughts/plans/*": "allow"
-    ".opencode/thoughts/shared/handoffs/*": "allow"
-  write:
-    ".opencode/thoughts/plans/*": "allow"
-    ".opencode/thoughts/shared/handoffs/*": "allow"
+permission:
+  read: "allow"
+  grep: "allow"
+  glob: "allow"
+  list: "allow"
+  task: "allow"
+  todowrite: "allow"
+  todoread: "allow"
+  webfetch: "allow"
   bash:
     "git rev-parse HEAD": "allow"
     "git branch --show-current": "allow"
+    "*": "deny"
+  edit:
+    ".opencode/thoughts/plans/*": "allow"
+    ".opencode/thoughts/shared/handoffs/*": "allow"
+    "*": "deny"
+  write:
+    ".opencode/thoughts/plans/*": "allow"
+    ".opencode/thoughts/shared/handoffs/*": "allow"
+    "*": "deny"
 ---
 
 # Plan (Humanlayer) Agent

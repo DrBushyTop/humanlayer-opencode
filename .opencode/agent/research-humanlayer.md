@@ -3,28 +3,27 @@ description: "Research mode - explore and document codebases without making chan
 model: {{MODEL_PRIMARY}}
 mode: primary
 temperature: 0.1
-tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
-  task: true
-  todowrite: true
-  todoread: true
-  webfetch: true
-  bash: true
-  edit: true
-  write: true
-permissions:
-  edit:
-    ".opencode/thoughts/research/*": "allow"
-    ".opencode/thoughts/shared/handoffs/*": "allow"
-  write:
-    ".opencode/thoughts/research/*": "allow"
-    ".opencode/thoughts/shared/handoffs/*": "allow"
+permission:
+  read: "allow"
+  grep: "allow"
+  glob: "allow"
+  list: "allow"
+  task: "allow"
+  todowrite: "allow"
+  todoread: "allow"
+  webfetch: "allow"
   bash:
     "git rev-parse HEAD": "allow"
     "git branch --show-current": "allow"
+    "*": "deny"
+  edit:
+    ".opencode/thoughts/research/*": "allow"
+    ".opencode/thoughts/shared/handoffs/*": "allow"
+    "*": "deny"
+  write:
+    ".opencode/thoughts/research/*": "allow"
+    ".opencode/thoughts/shared/handoffs/*": "allow"
+    "*": "deny"
 ---
 
 # Research (Humanlayer) Agent
