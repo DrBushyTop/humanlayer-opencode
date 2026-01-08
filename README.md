@@ -1,5 +1,7 @@
 # HumanLayer OpenCode
 
+> > **⚠️ Work in Progress** - This is an experimental personal project, not production-ready.
+
 An [OpenCode](https://opencode.ai) implementation of the [HumanLayer](https://github.com/humanlayer/humanlayer) context engineering workflow.
 
 This repository provides agents and commands that implement the Research → Plan → Implement workflow pattern for AI-assisted development.
@@ -31,47 +33,49 @@ After installation, restart OpenCode for the commands and agents to become avail
 
 **Core Workflow:**
 
-| Command | Description |
-|---------|-------------|
-| `/research [topic]` | Comprehensive codebase research with parallel subagents |
-| `/plan [feature]` | Create phased implementation plans with verification gates |
-| `/implement [plan]` | Execute plans with human checkpoints between phases |
-| `/iterate [plan] [feedback]` | Update existing plans based on feedback |
-| `/validate [plan]` | Verify implementation matches the plan |
-| `/handoff [ticket]` | Create session handoff for continuity |
-| `/resume [handoff]` | Resume work from a previous handoff |
+| Command                      | Description                                                |
+| ---------------------------- | ---------------------------------------------------------- |
+| `/research [topic]`          | Comprehensive codebase research with parallel subagents    |
+| `/plan [feature]`            | Create phased implementation plans with verification gates |
+| `/implement [plan]`          | Execute plans with human checkpoints between phases        |
+| `/iterate [plan] [feedback]` | Update existing plans based on feedback                    |
+| `/validate [plan]`           | Verify implementation matches the plan                     |
+| `/handoff [ticket]`          | Create session handoff for continuity                      |
+| `/resume [handoff]`          | Resume work from a previous handoff                        |
 
 **Git Workflow:**
 
-| Command | Description |
-|---------|-------------|
-| `/commit` | Create a well-structured git commit |
-| `/describe-pr` | Generate PR description from changes |
-| `/local-review` | Review changes before committing |
+| Command         | Description                          |
+| --------------- | ------------------------------------ |
+| `/commit`       | Create a well-structured git commit  |
+| `/describe-pr`  | Generate PR description from changes |
+| `/local-review` | Review changes before committing     |
 
 **Utility:**
 
-| Command | Description |
-|---------|-------------|
+| Command           | Description                      |
+| ----------------- | -------------------------------- |
 | `/oneshot [task]` | Quick single-shot task execution |
 
 **Ralph Loop (Iterative Development):**
 
-| Command | Description |
-|---------|-------------|
+| Command                          | Description                              |
+| -------------------------------- | ---------------------------------------- |
 | `/ralph-loop [prompt] [options]` | Start iterative AI loop until completion |
-| `/cancel-ralph` | Cancel active Ralph loop |
-| `/ralph-status` | Check Ralph loop status |
-| `/ralph-help` | Explain Ralph Wiggum technique |
+| `/cancel-ralph`                  | Cancel active Ralph loop                 |
+| `/ralph-status`                  | Check Ralph loop status                  |
+| `/ralph-help`                    | Explain Ralph Wiggum technique           |
 
 ### Subagents
 
 **Research Agents:**
+
 - `codebase-locator` - Find WHERE files and components live
 - `codebase-analyzer` - Understand HOW specific code works
 - `pattern-finder` - Find examples of existing patterns
 
 **Thoughts Agents:**
+
 - `thoughts-locator` - Discover existing documentation
 - `thoughts-analyzer` - Extract insights from documents
 
@@ -147,6 +151,7 @@ After initialization:
 ```
 
 Creates a research document in `thoughts/research/` with:
+
 - File locations and references
 - Architecture documentation
 - Cross-component connections
@@ -158,6 +163,7 @@ Creates a research document in `thoughts/research/` with:
 ```
 
 Creates a phased plan in `thoughts/plans/` with:
+
 - Current state analysis
 - Phased implementation steps
 - Success criteria (automated + manual)
