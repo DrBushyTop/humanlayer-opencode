@@ -11,7 +11,7 @@ permission:
   task: "allow"
   todowrite: "allow"
   todoread: "allow"
-  webfetch: "allow"
+  webfetch: "deny"
   bash:
     "git rev-parse HEAD": "allow"
     "git branch --show-current": "allow"
