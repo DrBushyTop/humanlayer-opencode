@@ -124,7 +124,7 @@ After locators complete, spawn analyzers on the most promising findings:
 
 ### Step 5: Write Plan to File FIRST
 
-**CRITICAL**: Write the plan to file BEFORE showing anything to the user.
+**CRITICAL**: Write the plan to file BEFORE showing anything to the user. Do this yourself, do not delegate this to a subagent.
 
 1. Get git metadata:
    ```bash
