@@ -1,6 +1,7 @@
 ---
 description: "Documentation authoring agent"
 mode: subagent
+model: {{MODEL_SUBAGENT}}
 temperature: 0.2
 permission:
   read: "allow"

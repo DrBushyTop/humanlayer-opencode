@@ -1,6 +1,7 @@
 ---
 description: "Context-aware task breakdown specialist transforming complex features into atomic, verifiable subtasks with dependency tracking"
 mode: subagent
+model: {{MODEL_PRIMARY}}
 temperature: 0.1
 permission:
   read: "allow"

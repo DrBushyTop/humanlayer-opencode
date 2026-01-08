@@ -1,6 +1,7 @@
 ---
 description: "Type check and build validation agent"
 mode: subagent
+model: {{MODEL_SUBAGENT}}
 temperature: 0.1
 permission:
   bash:

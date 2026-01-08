@@ -2,6 +2,7 @@
 # OpenCode Agent Configuration
 description: "Multi-language implementation agent for modular and functional development"
 mode: primary
+model: {{MODEL_PRIMARY}}
 temperature: 0.1
 permission:
   read: "allow"

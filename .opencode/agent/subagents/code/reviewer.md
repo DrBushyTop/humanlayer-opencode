@@ -2,6 +2,7 @@
 
 description: "Code review, security, and quality assurance agent"
 mode: subagent
+model: {{MODEL_PRIMARY}}
 temperature: 0.1
 permission:
   read: "allow"

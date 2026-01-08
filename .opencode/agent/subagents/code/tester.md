@@ -1,6 +1,7 @@
 ---
 description: "Test authoring and TDD agent"
 mode: subagent
+model: {{MODEL_SUBAGENT}}
 temperature: 0.1
 permission:
   read: "allow"
