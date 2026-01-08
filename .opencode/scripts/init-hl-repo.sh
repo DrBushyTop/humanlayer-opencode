@@ -266,7 +266,7 @@ if can_interact; then
         echo "$AVAILABLE_MODELS" | sed 's/^/  /'
         
         # Select primary agent model
-        select_model "Select model for PRIMARY agents (research, plan):" "$AVAILABLE_MODELS" SELECTED_MODEL_PRIMARY
+        select_model "Select model for PRIMARY agents (research, plan, complex tasks...):" "$AVAILABLE_MODELS" SELECTED_MODEL_PRIMARY
         
         # Ask if user wants same model for subagents
         echo ""
@@ -274,7 +274,7 @@ if can_interact; then
             printf "Use same model for SUBAGENTS? [Y/n]: "
             read same_model </dev/tty
             if [[ "$same_model" =~ ^[Nn] ]]; then
-                select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
+                select_model "Select model for SUBAGENTS (analyzers, locators, pattern-finder, simple tasks...):" "$AVAILABLE_MODELS" SELECTED_MODEL_SUBAGENT
             else
                 SELECTED_MODEL_SUBAGENT="$SELECTED_MODEL_PRIMARY"
                 echo "  → Using same model for subagents: $SELECTED_MODEL_SUBAGENT"
