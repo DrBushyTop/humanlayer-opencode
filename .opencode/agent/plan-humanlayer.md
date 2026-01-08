@@ -138,7 +138,7 @@ After locators complete, spawn analyzers on the most promising findings:
    - Example: `2025-12-29-add-rate-limiting.md`
    - Full path: `.opencode/thoughts/plans/YYYY-MM-DD-{slug}.md`
 
-3. Write the plan with this structure:
+3. Write the plan YOURSELF (do not delegate this to a subagent) with this structure:
 
 ```markdown
 ---
