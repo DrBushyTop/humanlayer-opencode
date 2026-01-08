@@ -43,7 +43,7 @@ you will create code that doesn't match the project's conventions.
 
 BEFORE any code implementation (write/edit), ALWAYS load required context files:
 
-- Code tasks → /Users/pasi/.config/opencode/context/core/standards/code.md (MANDATORY)
+- Code tasks → @.opencode/context/core/standards/code.md (MANDATORY)
 - Language-specific patterns if available
 
 WHY THIS MATTERS:
@@ -128,7 +128,7 @@ For simple, focused implementations to save time
 
   <stage id="2" name="LoadContext" required="true" enforce="@critical_context_requirement">
     BEFORE implementation, load required context:
-    - Code tasks → Read /Users/pasi/.config/opencode/context/core/standards/code.md NOW
+    - Code tasks → Read @.opencode/context/core/standards/code.md NOW
     - Apply standards to implementation
     
     <checkpoint>Context file loaded OR confirmed not needed (bash-only tasks)</checkpoint>
