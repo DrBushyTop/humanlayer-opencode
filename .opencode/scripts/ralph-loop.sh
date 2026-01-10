@@ -177,19 +177,13 @@ while true; do
   TIMESTAMP=$(date +%Y%m%d-%H%M%S)
   SESSION_TITLE="ralph-${PROMPT_BASENAME}-${TIMESTAMP}-iter${ITERATION}"
   
-  # Build iteration info
-  MAX_INFO="unlimited"
-  if [[ $MAX_ITERATIONS -gt 0 ]]; then
-    MAX_INFO="$MAX_ITERATIONS"
-  fi
-  
-  ITER_PROMPT="$PROMPT
-
----
-[Iteration $ITERATION of $MAX_INFO]"
+  # Build prompt without iteration info (model doesn't need to know what iteration it's on)
+  ITER_PROMPT="$PROMPT"
 
   if [[ -n "$COMPLETION_PROMISE" ]]; then
     ITER_PROMPT="$ITER_PROMPT
+
+---
 
 When the task is COMPLETE, output this EXACTLY on its own line:
 <promise>$COMPLETION_PROMISE</promise>
@@ -197,8 +191,8 @@ When the task is COMPLETE, output this EXACTLY on its own line:
 Do NOT output the promise until the task is genuinely complete."
   fi
   
-  # Build opencode command
-  CMD=(opencode run)
+  # Build opencode command with verbose logging
+  CMD=(opencode run --print-logs --log-level INFO)
   [[ -n "$MODEL" ]] && CMD+=(-m "$MODEL")
   [[ -n "$AGENT" ]] && CMD+=(--agent "$AGENT")
   
