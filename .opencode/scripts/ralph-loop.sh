@@ -14,19 +14,15 @@ MODEL=""
 AGENT=""
 MAX_ITERATIONS=0
 COMPLETION_PROMISE=""
-SESSION_ID="ralph-$(date +%s)-$RANDOM"
 ITERATION=1
 GIT_PUSH=false
 GIT_PUSH_REMOTE="origin"
 GIT_PUSH_BRANCH=""
 
 # Parse arguments
-shift 2>/dev/null || true  # Skip first positional (prompt file) if provided
-
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    -h|--help)
-      cat << 'HELP_EOF'
+# Check for help first before shifting
+if [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]]; then
+  cat << 'HELP_EOF'
 Ralph Loop - Iterative AI loop for opencode
 
 USAGE:
@@ -40,7 +36,6 @@ OPTIONS:
   -a, --agent AGENT      Agent to use
   --max N                Maximum iterations (default: unlimited)
   --promise TEXT         Completion promise phrase (optional)
-  --session ID           Session ID to use (default: random)
   --push                 Git push after each iteration
   --push-remote REMOTE   Remote to push to (default: origin)
   --push-branch BRANCH   Branch to push (default: current branch)
@@ -48,8 +43,8 @@ OPTIONS:
 
 DESCRIPTION:
   Runs an iterative loop reading prompts from a file. Edit the file
-  between iterations to adjust the task. The same session is continued
-  across iterations.
+  between iterations to adjust the task. Each iteration creates a new
+  session with a title based on the prompt file name and timestamp.
 
   If --promise is set, the loop will stop when the AI outputs:
   <promise>YOUR_PHRASE</promise>
@@ -66,8 +61,17 @@ STOPPING:
   - Reaching --max iterations
   - Detecting --promise in output (if set)
 HELP_EOF
-      exit 0
-      ;;
+  exit 0
+fi
+
+# Skip first positional argument if it doesn't start with dash (it's the prompt file)
+if [[ $# -gt 0 ]] && [[ ! "${1:-}" =~ ^- ]]; then
+  PROMPT_FILE="$1"
+  shift
+fi
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
     -m|--model)
       MODEL="$2"
       shift 2
@@ -82,10 +86,6 @@ HELP_EOF
       ;;
     --promise)
       COMPLETION_PROMISE="$2"
-      shift 2
-      ;;
-    --session)
-      SESSION_ID="$2"
       shift 2
       ;;
     --push)
@@ -103,14 +103,8 @@ HELP_EOF
       shift 2
       ;;
     *)
-      # If first arg doesn't start with -, treat as prompt file
-      if [[ ! "$1" =~ ^- ]]; then
-        PROMPT_FILE="$1"
-      else
-        echo "Unknown option: $1" >&2
-        exit 1
-      fi
-      shift
+      echo "Unknown option: $1" >&2
+      exit 1
       ;;
   esac
 done
@@ -123,7 +117,6 @@ fi
 
 echo "=== Ralph Loop ==="
 echo "Prompt file: $PROMPT_FILE"
-echo "Session ID: $SESSION_ID"
 [[ -n "$MODEL" ]] && echo "Model: $MODEL"
 [[ -n "$AGENT" ]] && echo "Agent: $AGENT"
 if [[ $MAX_ITERATIONS -gt 0 ]]; then
@@ -179,6 +172,11 @@ while true; do
   # Read prompt from file
   PROMPT=$(cat "$PROMPT_FILE")
   
+  # Generate title from prompt file name and timestamp
+  PROMPT_BASENAME=$(basename "$PROMPT_FILE" .md)
+  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+  SESSION_TITLE="ralph-${PROMPT_BASENAME}-${TIMESTAMP}-iter${ITERATION}"
+  
   # Build iteration info
   MAX_INFO="unlimited"
   if [[ $MAX_ITERATIONS -gt 0 ]]; then
@@ -207,13 +205,8 @@ Do NOT output the promise until the task is genuinely complete."
   # Capture output
   OUTPUT=$(mktemp)
   
-  if [[ $ITERATION -eq 1 ]]; then
-    # First iteration: new session with title
-    "${CMD[@]}" --session "$SESSION_ID" --title "Ralph-$SESSION_ID" "$ITER_PROMPT" 2>&1 | tee "$OUTPUT"
-  else
-    # Subsequent iterations: continue session
-    "${CMD[@]}" --session "$SESSION_ID" --continue "$ITER_PROMPT" 2>&1 | tee "$OUTPUT"
-  fi
+  # Each iteration creates a new session with a descriptive title
+  "${CMD[@]}" --title "$SESSION_TITLE" "$ITER_PROMPT" 2>&1 | tee "$OUTPUT"
   
   # Git push if enabled
   if [[ "$GIT_PUSH" == true ]]; then
