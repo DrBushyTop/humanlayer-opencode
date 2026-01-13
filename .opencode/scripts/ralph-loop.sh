@@ -191,8 +191,7 @@ When the task is COMPLETE, output this EXACTLY on its own line:
 Do NOT output the promise until the task is genuinely complete."
   fi
   
-  # Build opencode command with verbose logging
-  CMD=(opencode run --print-logs --log-level INFO)
+  CMD=(opencode run )
   [[ -n "$MODEL" ]] && CMD+=(-m "$MODEL")
   [[ -n "$AGENT" ]] && CMD+=(--agent "$AGENT")
   
