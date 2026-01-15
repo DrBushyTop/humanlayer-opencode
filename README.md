@@ -12,15 +12,18 @@ Initialize any repository with the HumanLayer workflow:
 
 ```bash
 # Using curl (macOS/Linux)
-curl -fsSL https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/master/.opencode/scripts/init-hl-repo.sh | bash
-
-# Using PowerShell (Windows)
-irm https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/master/.opencode/scripts/init-hl-repo.sh | bash
+curl -fsSL https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/master/init-hl-repo.sh | bash
 
 # Or download and run manually
-curl -O https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/master/.opencode/scripts/init-hl-repo.sh
+curl -O https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/master/init-hl-repo.sh
 chmod +x init-hl-repo.sh
 ./init-hl-repo.sh [branch] [dest-dir]
+```
+
+```powershell
+# Using PowerShell (Windows)
+irm https://raw.githubusercontent.com/DrBushyTop/humanlayer-opencode/master/init-hl-repo.ps1 -OutFile init-hl-repo.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\init-hl-repo.ps1 -Branch master -DestDir .opencode
 ```
 
 After installation, restart OpenCode for the commands and agents to become available.
@@ -134,7 +137,6 @@ After initialization:
 │   ├── local-review.md
 │   └── oneshot.md
 ├── scripts/                    # Utility scripts
-│   ├── init-hl-repo.sh
 │   └── spec_metadata.sh
 └── thoughts/                   # Persistent artifacts
     ├── research/               # Research documents
