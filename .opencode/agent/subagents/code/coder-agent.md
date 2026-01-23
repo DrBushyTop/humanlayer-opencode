@@ -6,12 +6,12 @@ temperature: 0
 permission:
   read: "allow"
   edit:
+    "*": "allow"
     "**/*.env*": "deny"
     "**/*.key": "deny"
     "**/*.secret": "deny"
     "node_modules/**": "deny"
     ".git/**": "deny"
-    "*": "allow"
   write: "allow"
   grep: "allow"
   glob: "allow"

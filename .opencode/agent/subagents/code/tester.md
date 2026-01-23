@@ -8,15 +8,15 @@ permission:
   grep: "allow"
   glob: "allow"
   edit:
+    "*": "allow"
     "**/*.env*": "deny"
     "**/*.key": "deny"
     "**/*.secret": "deny"
-    "*": "allow"
   write: "allow"
   bash:
+    "*": "allow"
     "rm -rf *": "ask"
     "sudo *": "deny"
-    "*": "allow"
 ---
 
 # Write Test Agent

@@ -13,17 +13,17 @@ permission:
   todoread: "allow"
   webfetch: "allow"
   bash:
+    "*": "deny"
     "git rev-parse HEAD": "allow"
     "git branch --show-current": "allow"
-    "*": "deny"
   edit:
+    "*": "deny"
     ".opencode/thoughts/plans/*": "allow"
     ".opencode/thoughts/shared/handoffs/*": "allow"
-    "*": "deny"
   write:
+    "*": "deny"
     ".opencode/thoughts/plans/*": "allow"
     ".opencode/thoughts/shared/handoffs/*": "allow"
-    "*": "deny"
 ---
 
 # Plan (Humanlayer) Agent
