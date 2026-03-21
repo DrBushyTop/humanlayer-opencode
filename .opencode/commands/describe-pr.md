@@ -4,8 +4,6 @@ agent: Build
 subtask: true
 ---
 
-# Describe PR Command
-
 ## Trigger
 
 `/describe_pr [optional title hint]`
@@ -186,6 +184,7 @@ Make some changes and commit them first.
 ````
 
 ### Branch Not Pushed
+
 
 ```markdown
 ## Branch Not Pushed

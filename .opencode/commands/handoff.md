@@ -5,8 +5,6 @@ tools:
   bash: true
 ---
 
-# Handoff Command
-
 Create a handoff document. Optional arguments: `$ARGUMENTS`
 
 **Argument formats:**

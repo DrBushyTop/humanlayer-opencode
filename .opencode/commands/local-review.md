@@ -2,8 +2,6 @@
 description: "Perform local code review before commit or PR"
 ---
 
-# Local Review Command
-
 ## Trigger
 
 `/local_review [optional focus area]`
@@ -31,6 +29,7 @@ Determine scope:
 - Both
 
 ### Step 2: Gather Changes
+
 
 ```bash
 # For uncommitted changes

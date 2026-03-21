@@ -3,8 +3,6 @@ description: "Update an existing implementation plan based on feedback"
 agent: plan-humanlayer
 ---
 
-# Iterate Plan Command
-
 Iterate on the plan with: `$ARGUMENTS`
 
 If no path given, find most recent plan in `.opencode/thoughts/plans/`.
@@ -23,11 +21,13 @@ Make surgical edits, not rewrites:
 
 ### Step 1: Parse Input
 
+
 1. Extract plan path and feedback from: `$ARGUMENTS`
 2. If no path given, find most recent plan in `.opencode/thoughts/plans/`
 3. If no feedback given, ask user what to change
 
 ### Step 2: Load Context
+
 
 1. Read the plan file COMPLETELY
 2. Understand the full context before making changes
@@ -83,6 +83,7 @@ I understand you want to: [paraphrase feedback]
 ```
 
 ### Step 6: Make Edits
+
 
 1. Use Edit tool for precise changes
 2. Don't rewrite entire sections unnecessarily

@@ -4,8 +4,6 @@ agent: Build
 subtask: true
 ---
 
-# Commit Command
-
 ## Trigger
 
 `/commit [optional message hint]`

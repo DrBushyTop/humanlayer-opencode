@@ -1,19 +1,17 @@
 ---
 description: "Resume work from a handoff document"
-tools:
-  bash: true
 ---
-
-# Resume Command
 
 Resume from handoff: `$ARGUMENTS`
 
 **Argument formats:**
+
 - `/resume` - List recent handoffs and ask user to choose
 - `/resume path/to/handoff.md` - Resume from specific handoff file
 - `/resume TICKET-123` - Resume from most recent handoff for ticket
 
 ## Purpose
+
 Resume work from a handoff document, verifying current state and restoring context for seamless continuation.
 
 ## Process
@@ -93,13 +91,13 @@ Spawn research if needed to verify:
 
 ### Handoff Summary
 
-| Field             | Value     |
-| ----------------- | --------- |
-| Created           | [date]    |
+| Field             | Value              |
+| ----------------- | ------------------ |
+| Created           | [date]             |
 | Ticket            | [ticket or "none"] |
-| Branch            | [branch]  |
-| Commit at handoff | [commit]  |
-| Current commit    | [current] |
+| Branch            | [branch]           |
+| Commit at handoff | [commit]           |
+| Current commit    | [current]          |
 
 ### State Verification
 
@@ -192,6 +190,7 @@ If ticket directory doesn't exist or is empty:
 I couldn't find any handoffs for ticket `{TICKET}`.
 
 Available options:
+
 1. Check if the ticket number is correct
 2. Provide the full path to the handoff file
 3. Run `/resume` without arguments to see all available handoffs
@@ -200,6 +199,7 @@ Available options:
 ## Directory Structure
 
 Handoffs are stored in:
+
 ```
 .opencode/thoughts/shared/handoffs/
 ├── ENG-2166/

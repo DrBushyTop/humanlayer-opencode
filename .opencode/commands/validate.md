@@ -3,8 +3,6 @@ description: "Verify implementation matches plan and all success criteria pass"
 agent: plan-humanlayer
 ---
 
-# Validate Plan Command
-
 Validate the plan: `$ARGUMENTS`
 
 If no path given, find most recent plan in `.opencode/thoughts/plans/`.
@@ -50,6 +48,7 @@ Think critically about:
 - Test coverage
 
 ### Step 6: Generate Report
+
 
 ```markdown
 ## Validation Report: [Plan Name]
