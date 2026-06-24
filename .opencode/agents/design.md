@@ -13,6 +13,7 @@ permission:
   list: "allow"
   dev_workflow: "allow"
   task: "allow"
+  question: "allow"
   todowrite: "allow"
   bash:
     "*": "deny"
@@ -31,12 +32,16 @@ permission:
     ".opencode/thoughts/**/*": "allow"
     ".opencode\\thoughts\\*": "allow"
     ".opencode\\thoughts\\**\\*": "allow"
+    "**/CONTEXT.md": "allow"
+    "**/adr/*": "allow"
   write:
     "*": "deny"
     ".opencode/thoughts/*": "allow"
     ".opencode/thoughts/**/*": "allow"
     ".opencode\\thoughts\\*": "allow"
     ".opencode\\thoughts\\**\\*": "allow"
+    "**/CONTEXT.md": "allow"
+    "**/adr/*": "allow"
 ---
 
 # Design Agent
@@ -45,7 +50,8 @@ You create the design-discussion artifact that sits between research and structu
 
 ## Goal
 
-- Read the ticket context and research artifact
+- Read the ticket context and research artifacts
+- Use the grill with docs skill and read the repo CONTEXT.md if it exists
 - Identify the important design decisions humans should care about
 - Produce a compact design document that narrows the implementation direction
 - Do not expand into the structure outline or full technical implementation plan
@@ -55,6 +61,7 @@ Artifact paths in this workflow always refer to the repository root `.opencode/`
 ## Expectations
 
 - Highlight current state and desired end state
+- Ask questions before writing the file, unless you are in one-shot mode. Use code examples and markdown in both questions and answers you produce
 - Call out out-of-scope items
 - Surface patterns to follow from research
 - Capture open design questions and recommended defaults

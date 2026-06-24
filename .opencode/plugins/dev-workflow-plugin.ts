@@ -290,7 +290,7 @@ const DevWorkflow: Plugin = async ({ client, directory }) => {
     }
   }
 
-  async function maybeAdvance(sessionID: string, hint?: { dir?: string; phase?: Phase; mode?: string; action?: string }) {
+  async function maybeAdvance(sessionID: string, hint?: { dir?: string; phase?: Phase; sourcePhase?: Phase; mode?: string; action?: string }) {
     if (busy.has(sessionID)) return
     busy.add(sessionID)
     debug("advance.start", { sessionID, hint })
@@ -298,7 +298,7 @@ const DevWorkflow: Plugin = async ({ client, directory }) => {
     try {
       const items = hint ? undefined : await messages(sessionID).catch(() => undefined)
       const last = items?.filter((item) => item.info?.role === "user").at(-1)
-      const current = hint?.phase ?? phase(last?.info?.agent)
+      const current = hint?.sourcePhase ?? hint?.phase ?? phase(last?.info?.agent)
       if (!current) return
 
       const text = last?.parts
@@ -427,11 +427,15 @@ const DevWorkflow: Plugin = async ({ client, directory }) => {
           debug("tool.execute.after.implementation_source", { dir, sourcePhase, sessionID: input.sessionID })
         }
       }
+      const items = await messages(input.sessionID).catch(() => undefined)
+      const last = items?.filter((item) => item.info?.role === "user").at(-1)
+      const sourcePhase = phase(last?.info?.agent)
       setTimeout(() => {
         if (dir) ticketDirs.set(input.sessionID, dir)
         void maybeAdvance(input.sessionID, {
           dir,
           phase: input.args.phase,
+          sourcePhase,
           mode: input.args.transition_mode,
           action: input.args.action,
         })

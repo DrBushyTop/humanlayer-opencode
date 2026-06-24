@@ -46,5 +46,3 @@ Rules:
 - The objective must have at least one positive and one negative test, each with a clear comment linking it to the objective.
 - Favor deterministic tests; avoid network and time flakiness.
 - Run related tests after edits and fix lints before handoff.
-
-

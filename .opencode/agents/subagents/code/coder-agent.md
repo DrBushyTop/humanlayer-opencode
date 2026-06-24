@@ -15,7 +15,8 @@ permission:
   write: "allow"
   grep: "allow"
   glob: "allow"
-  bash: "deny"
+  bash: "allow"
+  task: "allow"
   patch: "allow"
 ---
 

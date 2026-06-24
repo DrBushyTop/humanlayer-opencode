@@ -140,6 +140,7 @@ export async function writeState(input: {
     .json()
     .catch(() => undefined) as
     | {
+        currentPhase?: string
         transitionMode?: string
         stalePhases?: string[]
         branchName?: string
@@ -154,8 +155,16 @@ export async function writeState(input: {
 
   const previousStale = Array.isArray(prev?.stalePhases) ? prev.stalePhases.filter((x): x is string => typeof x === "string") : []
   const action: Action = input.action ?? "complete"
+  const previousCurrentPhase = phaseOrder.includes(prev?.currentPhase as Phase)
+    ? prev?.currentPhase as Phase
+    : undefined
+  const structureRequestedPlan = action === "complete"
+    && previousCurrentPhase === "structure"
+    && input.phase === "plan"
   const currentPhase = action === "rewind"
     ? input.phase
+    : structureRequestedPlan
+      ? input.phase
     : await resolve({ cwd: input.cwd, ticketDir: input.ticketDir, phase: input.phase, transitionMode })
   const stalePhases = action === "rewind"
     ? staleAfter(input.phase)

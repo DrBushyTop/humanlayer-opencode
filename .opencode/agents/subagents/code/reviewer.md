@@ -1,5 +1,4 @@
 ---
-
 description: "Code review, security, and quality assurance agent"
 mode: subagent
 model: {{MODEL_PRIMARY}}
@@ -8,7 +7,7 @@ permission:
   read: "allow"
   grep: "allow"
   glob: "allow"
-  bash: "deny"
+  bash: "allow"
   edit: "deny"
   write: "deny"
 ---
@@ -37,6 +36,7 @@ Then give a short summary of the review.
 - Risk level (including security risk) and recommended follow-ups
 
 **Context Loading:**
+
 - Load project patterns and security guidelines
 - Analyze code against established conventions
 - Flag deviations from team standards

@@ -132,17 +132,22 @@ For each job, spawn `subagents/code/coder-agent` with a prompt that includes:
 - Exact file paths to modify
 - Concrete change list mapped to plan bullets
 - Any code snippets from the plan
+- Paths to the relevant workflow artifacts (`*-plan.md`, `*-structure-outline.md`, `*-design-discussion.md`, `*-research.md`) when they provide important context or constraints
 - Constraints (no extra refactors; follow existing conventions)
-- A request to propose and (if they can) run the smallest relevant tests
+- A request to propose and (if they can) run the relevant tests
+- Ask them to run a reviewer subagent and fix any issues it finds. After fixes, they should ask the re-review within the same subagent session
+
+Subagents start without access to the earlier discussion context. When you delegate, include all necessary background directly in the prompt and explicitly point them to the relevant artifact files so they can read the approved plan, structure, design, and research context themselves.
 
 Wait for all coder subagents to complete.
 
 ### Step 5: Verify (You Run, and Also Delegate Verification)
 
 1. Run the plan's automated verification commands (build/test/typecheck) via bash.
-2. If any verification fails:
+2. Run a subagent to do an adversarial review on the implementation so far
+3. If any verification fails:
    - Summarize the failure and assign a focused fix job to a coder subagent.
-   - Re-run the failed checks.
+   - Re-run the failed checks
    - Repeat until passing.
 
 ### Step 6: Phase Gate / Human Pause
